@@ -7,7 +7,18 @@ import { Prisma } from 'generated/prisma/client';
 @Injectable()
 export class EmployeeService {
     constructor(private readonly databaseService: DatabaseService) {}
-
+    private readonly users = [
+        {
+            userId: 1,
+            username: 'john',
+            password: 'changeme',
+        },
+        {
+            userId: 2,
+            username: 'maria',
+            password: 'guess',
+        },
+    ];
     create(createEmployeeDto: Prisma.EmployeeCreateInput) {
         return this.databaseService.employee.create({
             data: createEmployeeDto,
@@ -48,5 +59,9 @@ export class EmployeeService {
                 id,
             },
         });
+    }
+
+    async findOneUserName(username: string): Promise<any | undefined> {
+        return this.users.find((user) => user.username === username);
     }
 }
