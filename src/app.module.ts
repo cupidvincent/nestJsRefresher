@@ -10,6 +10,9 @@ import { AuthModule } from './modules/auth/auth.module';
 import { AuthController } from './modules/auth/auth.controller';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './lib/auth/guards/jwt-auth.guard';
+import { TasksModule } from './modules/tasks/tasks.module';
+import { TasksController } from './modules/tasks/tasks.controller';
+import { AuthUserModule } from './modules/auth-user/auth-user.module';
 @Module({
     imports: [
         ConfigModule.forRoot({
@@ -19,8 +22,10 @@ import { JwtAuthGuard } from './lib/auth/guards/jwt-auth.guard';
         DatabaseModule,
         EmployeeModule,
         AuthModule,
+        TasksModule,
+        AuthUserModule,
     ],
-    controllers: [AppController, UsersController, AuthController],
+    controllers: [AppController, UsersController, AuthController, TasksController],
     providers: [
         AppService,
         // {

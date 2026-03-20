@@ -34,6 +34,30 @@ enum Role {
   manager
 }
 
+model Tasks {
+  id          Int @default(autoincrement()) @unique
+  title       String
+  description String
+  status      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userId      Int
+  user        Users    @relation(fields: [userId], references: [id])
+
+}
+
+model Users {
+  id          Int @default(autoincrement())  @unique
+  first_name  String
+  last_name   String
+  email       String  @unique
+  password    String @default("")
+  tasks       Tasks[]   // 1 user -> many tasks
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt 
+}
+
 /**
 npx prisma migrate dev --name add_users_table
 # Creates a new migration from schema changes, applies it to your local DB, and regenerates Prisma Client.

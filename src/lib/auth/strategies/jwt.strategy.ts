@@ -7,13 +7,14 @@ import { jwtConstants } from 'src/modules/auth/constants';
 export class JwtStrategy extends PassportStrategy(Strategy) {
     constructor() {
         super({
-            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+            // jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+            jwtFromRequest: ExtractJwt.fromExtractors([(req) => req?.cookies?.access_token]),
             ignoreExpiration: false,
             secretOrKey: jwtConstants.secret,
         });
     }
 
     async validate(payload: any) {
-        return { userId: payload.sub, username: payload.username };
+        return { userId: payload.sub, username: payload.email };
     }
 }

@@ -10,12 +10,12 @@ export class EmployeeService {
     private readonly users = [
         {
             userId: 1,
-            username: 'john',
+            email: 'cupidvincent@gmail.com',
             password: 'changeme',
         },
         {
             userId: 2,
-            username: 'maria',
+            username: 'cupidvincent1@gmail.com',
             password: 'guess',
         },
     ];
@@ -61,7 +61,7 @@ export class EmployeeService {
         });
     }
 
-    async findOneUserName(username: string): Promise<any | undefined> {
-        return this.users.find((user) => user.username === username);
+    async findOneUserName(email: string): Promise<any | undefined> {
+        return this.users.find((user) => user.email === email);
     }
 }
