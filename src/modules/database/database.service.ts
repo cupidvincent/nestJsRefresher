@@ -13,6 +13,33 @@ export class DatabaseService extends PrismaClient {
 
     /**
      *
+     * refresh tokens operations
+     *
+     */
+
+    async findRefreshTokens(userId: number) {
+        return this.refreshToken.findMany({
+            where: { userId },
+        });
+    }
+
+    async deleteRefreshToken(id: number) {
+        return this.refreshToken.delete({
+            where: { id },
+        });
+    }
+
+    async createRefreshToken(userId: number, token: string) {
+        return this.refreshToken.create({
+            data: {
+                token,
+                userId,
+            },
+        });
+    }
+
+    /**
+     *
      * Below are the /user or /auth operations
      */
 
@@ -24,6 +51,14 @@ export class DatabaseService extends PrismaClient {
         return this.users.findUnique({
             where: {
                 email,
+            },
+        });
+    }
+
+    async findById(id: number) {
+        return this.users.findUnique({
+            where: {
+                id,
             },
         });
     }

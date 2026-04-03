@@ -25,7 +25,6 @@ export class TasksController {
     @UseGuards(JwtAuthGuard)
     @Post()
     create(@Body(ValidationPipe) createTaskDto: CreateTaskDto, @Request() req) {
-        console.log({ reee: req.user });
         return this.tasksService.create(createTaskDto, req.user.userId);
     }
 
@@ -43,10 +42,6 @@ export class TasksController {
     @UseGuards(JwtAuthGuard)
     @Patch(':id')
     update(@Param('id') id: string, @Body() updateTaskDto: Prisma.TasksUpdateInput) {
-        console.log({
-            id,
-            updateTaskDto,
-        });
         return this.tasksService.update(+id, updateTaskDto);
     }
 

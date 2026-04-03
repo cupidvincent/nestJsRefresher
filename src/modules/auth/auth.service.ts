@@ -4,6 +4,7 @@ import { EmployeeService } from '../employee/employee.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { Prisma } from 'generated/prisma/client';
+import { jwtConstants } from './constants';
 
 @Injectable()
 export class AuthService {
@@ -40,16 +41,72 @@ export class AuthService {
             throw new UnauthorizedException('Invalid credentials');
         }
         const payload = {
-            sub: user.id,
-            email: user.email,
+            sub: authUser.id,
+            email: authUser.email,
         };
 
         const access_token = this.jwtService.sign(payload);
+
+        const refresh_token = this.jwtService.sign(payload, {
+            secret: jwtConstants.refresh_secret,
+            expiresIn: '7d',
+        });
+        const hashed = await bcrypt.hash(refresh_token, 10);
         const { password, id, ...result } = authUser;
+        this.databaseService.createRefreshToken(id, hashed);
         // 4️⃣ Return token
         return {
             ...result,
             access_token,
+            refresh_token,
+        };
+    }
+
+    async refreshTokens(userId: number, refreshToken: string) {
+        const tokens = await this.databaseService.findRefreshTokens(userId);
+        const authUser = await this.databaseService.findById(userId);
+        if (!authUser) {
+            throw new UnauthorizedException('Invalid credentials');
+        }
+        let matchedToken: { id: number; createdAt: Date; token: string; userId: number } | null =
+            null;
+
+        for (const token of tokens) {
+            const isMatch = await bcrypt.compare(refreshToken, token.token);
+            if (isMatch) {
+                matchedToken = token;
+                break;
+            }
+        }
+
+        if (!matchedToken) {
+            throw new UnauthorizedException('Invalid refresh token');
+        }
+
+        const payload = { sub: userId, username: authUser.email };
+
+        // 🔄 rotate tokens
+        const newAccessToken = this.jwtService.sign(payload, {
+            secret: process.env.JWT_ACCESS_SECRET,
+            expiresIn: '15m',
+        });
+
+        const newRefreshToken = this.jwtService.sign(payload, {
+            secret: process.env.JWT_REFRESH_SECRET,
+            expiresIn: '7d',
+        });
+
+        // ❗ delete only the used token (device-specific)
+        await this.databaseService.deleteRefreshToken(matchedToken.id);
+
+        const hashed = await bcrypt.hash(newRefreshToken, 10);
+
+        await this.databaseService.createRefreshToken(userId, hashed);
+        const { password, id, ...result } = authUser;
+        return {
+            user: result,
+            access_token: newAccessToken,
+            refresh_token: newRefreshToken,
         };
     }
 

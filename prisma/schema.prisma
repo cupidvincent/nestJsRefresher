@@ -35,7 +35,7 @@ enum Role {
 }
 
 model Tasks {
-  id          Int @default(autoincrement()) @unique
+ id Int @id @default(autoincrement())
   title       String
   description String
   status      String
@@ -48,14 +48,23 @@ model Tasks {
 }
 
 model Users {
-  id          Int @default(autoincrement())  @unique
+ id Int @id @default(autoincrement())
   first_name  String
   last_name   String
   email       String  @unique
   password    String @default("")
   tasks       Tasks[]   // 1 user -> many tasks
+  refreshTokens RefreshToken[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt 
+}
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  token     String
+  userId    Int
+  user      Users     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
 }
 
 /**
